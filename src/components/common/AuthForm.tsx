@@ -7,6 +7,8 @@ import {
   Typography,
   Link,
   Alert,
+  Paper,
+  Grid,
   Checkbox,
   FormControlLabel,
   useTheme,
@@ -27,6 +29,7 @@ interface AuthFormProps {
   linkText: string;
   linkPath: string;
   error?: string;
+  isLogin?: boolean;
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({
@@ -41,187 +44,207 @@ const AuthForm: React.FC<AuthFormProps> = ({
   linkText,
   linkPath,
   error,
+  isLogin,
 }) => {
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
     <Box
       sx={{
+        height: '100vh',
         display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-        backgroundColor: 'white',
-        borderRadius: '20px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-        overflow: 'hidden',
-        width: '100%',
-        maxWidth: { xs: '95%', sm: '600px', md: '900px' },
-        minHeight: { xs: 'auto', md: '500px' },
-        my: { xs: 4, sm: 6 },
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: '#fff',
       }}
     >
-      {/* Welcome message for mobile - shown at top */}
-      {isMobile && (
-        <Box
-          sx={{
-            p: { xs: 4, sm: 5 },
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            color: 'white',
-          }}
-        >
-          <Typography variant="h5" sx={{ mb: { xs: 2, sm: 3 }, fontWeight: 'bold' }}>
-            {welcomeMessage || 'Welcome Back!'}
-          </Typography>
-          <Typography variant="body2" align="center" sx={{ maxWidth: '80%' }}>
-            {welcomeDescription || "We're excited to have you back. Please sign in to continue your journey with us."}
-          </Typography>
-        </Box>
-      )}
-
-      {/* Form section */}
-      <Box
+      <Paper
+        elevation={0}
         sx={{
-          flex: { xs: '1', md: '1' },
-          p: { xs: 3, sm: 4, md: 5 },
+          width: '100%',
+          maxWidth: 900,
+          borderRadius: 3,
+          overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: isMobile ? 'column-reverse' : 'row',
+          border: 'none',
         }}
       >
-        <Typography variant="h4" sx={{ 
-          mb: { xs: 2, sm: 3 },
-          fontWeight: 'bold', 
-          fontSize: { xs: '1.5rem', md: '2rem' } 
-        }}>
-          {title}
-        </Typography>
-        {subtitle && (
-          <Typography variant="body1" color="text.secondary" sx={{ mb: { xs: 3, sm: 4 } }}>
-            {subtitle}
-          </Typography>
-        )}
-        
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={onSubmit}
+        {/* Left side - Form */}
+        <Box
+          sx={{
+            width: isMobile ? '100%' : '50%',
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         >
-          {({ errors, touched, isSubmitting }) => (
-            <Form style={{ width: '100%' }}>
-              <Box sx={{ mt: { xs: 2, sm: 3 } }}>
-                {error && (
-                  <Alert severity="error" sx={{ mb: { xs: 2, sm: 3 } }}>
-                    {error}
-                  </Alert>
-                )}
+          <Typography variant="h4" component="h1" sx={{ mb: 3, fontWeight: 600, color: '#7C3AED' }}>
+            {title}
+          </Typography>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={onSubmit}
+          >
+            {({ errors, touched, isSubmitting }) => (
+              <Form style={{ width: '100%' }}>
                 {Object.keys(initialValues).map((field) => (
-                  <Field
-                    key={field}
-                    name={field}
-                    as={TextField}
-                    margin="normal"
-                    fullWidth
-                    label={field.charAt(0).toUpperCase() + field.slice(1)}
-                    error={touched[field] && Boolean(errors[field])}
-                    helperText={touched[field] && errors[field]}
-                    type={field === 'password' || field === 'confirmPassword' ? 'password' : 'text'}
-                    sx={{
-                      mb: { xs: 2, sm: 3 },
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '10px',
-                        backgroundColor: '#f8f9fa',
-                      },
-                    }}
-                  />
+                  <Box key={field} sx={{ mb: 2 }}>
+                    <Typography variant="caption" sx={{ mb: 0.5, color: '#7C3AED' }}>
+                      {field === 'confirmPassword' ? 'Confirm Password' : 
+                       field.charAt(0).toUpperCase() + field.slice(1)}
+                    </Typography>
+                    <Field
+                      name={field}
+                      as={TextField}
+                      fullWidth
+                      variant="outlined"
+                      placeholder={field === 'confirmPassword' ? 'Confirm your password' : `Enter your ${field}`}
+                      error={touched[field] && Boolean(errors[field])}
+                      helperText={touched[field] && errors[field]}
+                      type={field === 'password' || field === 'confirmPassword' ? 'password' : 'text'}
+                      InputProps={{
+                        sx: {
+                          bgcolor: '#fff',
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'rgba(0, 0, 0, 0.1)',
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#7C3AED',
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#7C3AED',
+                          },
+                        },
+                      }}
+                    />
+                  </Box>
                 ))}
-                
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: { xs: 'column', sm: 'row' },
-                  justifyContent: 'space-between', 
-                  alignItems: { xs: 'flex-start', sm: 'center' }, 
-                  mt: { xs: 2, sm: 3 },
-                  mb: { xs: 3, sm: 4 },
-                  gap: { xs: 2, sm: 0 }
-                }}>
+
+                {initialValues.password && (
                   <FormControlLabel
-                    control={<Checkbox color="primary" />}
-                    label="Remember me"
+                    control={
+                      <Checkbox 
+                        size="small" 
+                        sx={{
+                          color: '#7C3AED',
+                          '&.Mui-checked': {
+                            color: '#7C3AED',
+                          },
+                        }}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" sx={{ color: '#7C3AED' }}>
+                        Remember me
+                      </Typography>
+                    }
+                    sx={{ mb: 2 }}
                   />
-                  <Link
-                    component="button"
-                    variant="body2"
-                    onClick={() => navigate('/forgot-password')}
-                    sx={{ textDecoration: 'none' }}
-                  >
-                    Forgot password?
-                  </Link>
-                </Box>
+                )}
 
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{
-                    mt: { xs: 2, sm: 3 },
-                    mb: { xs: 3, sm: 4 },
-                    borderRadius: '10px',
-                    py: { xs: 1.5, sm: 2 },
-                    textTransform: 'none',
-                    fontSize: { xs: '0.9rem', sm: '1rem' },
-                    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                    boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
-                  }}
+                  size="large"
                   disabled={isSubmitting}
+                  sx={{ 
+                    mt: 1, 
+                    mb: 3, 
+                    py: 1.5,
+                    textTransform: 'none',
+                    borderRadius: 1,
+                    fontSize: 16,
+                    bgcolor: '#7C3AED',
+                    '&:hover': {
+                      bgcolor: '#6D28D9',
+                    },
+                    boxShadow: 'none',
+                  }}
                 >
                   {submitButtonText}
                 </Button>
 
-                <Box sx={{ textAlign: 'center', mt: { xs: 2, sm: 3 } }}>
-                  <Link
-                    component="button"
-                    variant="body2"
-                    onClick={() => navigate(linkPath)}
-                    sx={{ textDecoration: 'none' }}
-                  >
-                    {linkText}
-                  </Link>
+                <Box sx={{display:'flex', flexDirection:'column', alignItems:'center', gap: 2 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', }}>
+                    {linkText.split('?')[0]}
+                    <Link
+                      component="button"
+                      onClick={() => navigate(linkPath)}
+                      sx={{ 
+                        ml: 0.5, 
+                        fontWeight: 600,
+                      
+                        color: '#7C3AED',
+                        textDecoration: 'none',
+                        '&:hover': {
+                          textDecoration: 'underline',
+                        },
+                      }}
+                    >
+                      {linkText.includes('?') ? linkText.split('?')[1].trim() : 'Sign up'}
+                    </Link>
+                  </Typography>
+                  {isLogin && (
+                  
+                     
+                      <Link
+                      component="button"
+                      onClick={() => navigate(linkPath)}
+                      sx={{ 
+                        ml: 0.5, 
+                        fontWeight: 600,
+                        color: '#7C3AED',
+                        textDecoration: 'underline',
+                        '&:hover': {
+                          textDecoration: 'underline',
+                        },
+                      }}
+                      >
+                        Forgot password?
+                      </Link>
+                    
+                  )}
                 </Box>
-              </Box>
-            </Form>
-          )}
-        </Formik>
-      </Box>
+              </Form>
+            )}
+          </Formik>
+        </Box>
 
-      {/* Welcome message for desktop - shown on right */}
-      {!isMobile && (
+        {/* Right side - Illustration */}
         <Box
           sx={{
-            flex: 1,
-            bgcolor: 'primary.main',
+            width: isMobile ? '100%' : '50%',
+            bgcolor: '#7C3AED',
             p: 4,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            color: 'white',
+            textAlign: 'center',
           }}
         >
-          <Typography variant="h4" sx={{ mb: 2, fontWeight: 'bold' }}>
-            {welcomeMessage || 'Welcome Back!'}
+          <Typography variant="h5" gutterBottom fontWeight={600} sx={{ color: '#fff' }}>
+            {welcomeMessage || "Welcome Back"}
           </Typography>
-          <Typography variant="body1" align="center" sx={{ maxWidth: '80%' }}>
-            {welcomeDescription || "We're excited to have you back. Please sign in to continue your journey with us."}
+          <Typography variant="body2" sx={{ maxWidth: '80%', mx: 'auto', color: 'rgba(255, 255, 255, 0.8)' }}>
+            {welcomeDescription || "Sign in to continue your journey"}
           </Typography>
         </Box>
-      )}
+      </Paper>
     </Box>
   );
 };
 
-export default AuthForm; 
+export default AuthForm;
