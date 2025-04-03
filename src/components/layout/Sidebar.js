@@ -1,0 +1,134 @@
+import React from 'react';
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Box,
+  Avatar,
+  Typography,
+  styled,
+} from '@mui/material';
+import {
+  Create as CreateIcon,
+  People as PeopleIcon,
+  Bookmark as BookmarkIcon,
+  Logout as LogoutIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
+import { grey } from '@mui/material/colors';
+
+const drawerWidth = 240;
+
+const menuItems = [
+  { text: 'Create Post', icon: <CreateIcon />, path: '/create-post' },
+  { text: 'Friends', icon: <PeopleIcon />, path: '/friends' },
+  { text: 'Saved Posts', icon: <BookmarkIcon />, path: '/saved' },
+  { text: 'Logout', icon: <LogoutIcon />, path: '/logout' },
+];
+
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  '& .MuiDrawer-paper': {
+    width: drawerWidth,
+    boxSizing: 'border-box',
+    marginTop: '66px',
+    background: '#fff',
+    borderRight: '1px solid rgba(124, 58, 237, 0.1)',
+    boxShadow: 'none',
+  },
+}));
+
+const StyledListItem = styled(ListItem)(({ theme }) => ({
+  margin: '8px 16px',
+  borderRadius: '12px',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    background: 'rgba(124, 58, 237, 0.1)',
+    transform: 'translateX(5px)',
+  },
+  '& .MuiListItemIcon-root': {
+    minWidth: '40px',
+    color: '#7C3AED',
+  },
+  '& .MuiListItemText-root': {
+    color: '#7C3AED',
+    '& .MuiTypography-root': {
+      fontWeight: 500,
+    },
+  },
+}));
+
+const ProfileSection = styled(Box)(({ theme }) => ({
+  padding: '20px 16px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    background: 'rgba(124, 58, 237, 0.1)',
+  },
+}));
+
+const Sidebar = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      navigate('/login');
+    } catch (error) {
+      // Error is handled by the auth slice
+    }
+  };
+
+  const handleItemClick = (path) => {
+    if (path === '/logout') {
+      handleLogout();
+    } else {
+      navigate(path);
+    }
+  };
+
+  return (
+    <StyledDrawer variant="permanent">
+      <Box sx={{ overflow: 'none',bgcolor:grey[100] ,}}>
+        <ProfileSection onClick={() => navigate('/profile')}>
+          <Avatar
+            src={user?.profilePicture}
+            alt={user?.username}
+            sx={{ width: 40, height: 40, border: '2px solid #7C3AED' }}
+          />
+          <Box>
+            <Typography variant="subtitle1" sx={{ color: '#7C3AED', fontWeight: 500 }}>
+              {user?.username}
+            </Typography>
+          </Box>
+        </ProfileSection>
+        <Divider sx={{ borderColor: 'rgba(124, 58, 237, 0.1)', }} />
+        <List>
+          {menuItems.map((item) => (
+            <StyledListItem
+              button
+              key={item.text}
+              onClick={() => handleItemClick(item.path)}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+            </StyledListItem>
+          ))}
+        </List>
+      </Box>
+    </StyledDrawer>
+  );
+};
+
+export default Sidebar; 
