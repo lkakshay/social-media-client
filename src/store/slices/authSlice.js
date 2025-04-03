@@ -15,11 +15,9 @@ export const register = createAsyncThunk(
   'auth/register',
   async ({ username, email, password }, { rejectWithValue }) => {
     try {
-      console.log('Registering user:', { username, email, password });
-      const { user, accessToken } = await authAPI.register(username, email, password);
-      return { user, accessToken };
+      const response = await authAPI.register(username, email, password);
+      return response;
     } catch (error) {
-      console.error('Registration failed:', error);
       return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
@@ -29,14 +27,12 @@ export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const { user, accessToken } = await authAPI.login(email, password);
-      return { user, accessToken };
+      const response = await authAPI.login(email, password);
+      return response;
     } catch (error) {
-      // Check if it's a 401 status (unauthorized) which typically means wrong credentials
       if (error.response?.status === 401) {
         return rejectWithValue('No user found with these credentials');
       }
-      // For other errors, use the server message or a generic error
       const errorMessage = error.response?.data?.message || 
                          error.response?.data?.error ||
                          'An error occurred during login';
@@ -51,7 +47,7 @@ export const logout = createAsyncThunk(
     try {
       await authAPI.logout();
     } catch (error) {
-      console.error('Client-side logout error during API call:', error);
+      console.error('Logout error:', error);
     }
   }
 );
@@ -63,21 +59,14 @@ export const setRefreshedToken = createAsyncThunk(
   }
 );
 
-// Thunk to check auth status on app load using the refresh token
 export const initializeApp = createAsyncThunk(
   'auth/initializeApp',
   async (_, { rejectWithValue }) => {
     try {
-      // Assume authAPI.refresh() now returns { user, accessToken }
-      // If not, you might need a dedicated endpoint or adjust authAPI.refresh
-      console.log('Initializing app, attempting token refresh...');
-      const { user, accessToken } = await authAPI.refresh(); 
-      console.log('Initialization refresh successful:', { user, accessToken });
-      return { user, accessToken };
+      const response = await authAPI.refresh();
+      return response;
     } catch (error) {
-      console.log('Initialization refresh failed (likely no valid refresh token):', error);
-      // Don't consider this a blocking error for the UI, just means user is not logged in
-      return rejectWithValue('No active session'); 
+      return rejectWithValue('No active session');
     }
   }
 );
@@ -90,78 +79,103 @@ const authSlice = createSlice({
       state.error = null;
     },
     setCredentials: (state, action) => {
-      state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
+      const { user, accessToken } = action.payload;
+      state.user = {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        bio: user.bio,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      };
+      state.accessToken = accessToken;
       state.isAuthenticated = true;
       state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // Handle initializeApp states
+      // Register
+      .addCase(register.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        const { user, accessToken } = action.payload;
+        state.user = {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          profilePicture: user.profilePicture,
+          bio: user.bio,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        };
+        state.accessToken = accessToken;
+        state.isAuthenticated = true;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Login
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(login.fulfilled, (state, action) => {
+        const { user, accessToken } = action.payload;
+        state.user = {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          profilePicture: user.profilePicture,
+          bio: user.bio,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        };
+        state.accessToken = accessToken;
+        state.isAuthenticated = true;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Logout
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.accessToken = null;
+        state.isAuthenticated = false;
+        state.loading = false;
+        state.error = null;
+      })
+      // Initialize App
       .addCase(initializeApp.pending, (state) => {
         state.initialLoading = true;
       })
       .addCase(initializeApp.fulfilled, (state, action) => {
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
+        const { user, accessToken } = action.payload;
+        state.user = {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          profilePicture: user.profilePicture,
+          bio: user.bio,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        };
+        state.accessToken = accessToken;
         state.isAuthenticated = true;
         state.initialLoading = false;
         state.error = null;
       })
       .addCase(initializeApp.rejected, (state) => {
         state.initialLoading = false;
-        state.isAuthenticated = false;
-        state.user = null;
-        state.accessToken = null;
-      })
-      .addCase(register.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(login.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-        state.isAuthenticated = false;
-        state.user = null;
-        state.accessToken = null;
-      })
-      .addCase(register.fulfilled, (state, action) => {
-        state.loading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
-        state.error = null;
-      })
-      .addCase(login.fulfilled, (state, action) => {
-        state.loading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
-        state.error = null;
-      })
-      .addCase(register.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-        state.isAuthenticated = false;
-      })
-      .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-        state.isAuthenticated = false;
-        state.user = null;
-        state.accessToken = null;
-      })
-      .addCase(logout.fulfilled, (state) => {
-        state.user = null;
-        state.accessToken = null;
-        state.isAuthenticated = false;
-        state.error = null;
-        state.loading = false;
-      })
-      .addCase(setRefreshedToken.fulfilled, (state, action) => {
-        state.accessToken = action.payload;
-        state.isAuthenticated = true;
       });
   },
 });

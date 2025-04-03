@@ -7,7 +7,6 @@ import {
   IconButton,
   Badge,
   Box,
-  Avatar,
   Menu,
   MenuItem,
   InputBase,
@@ -100,10 +99,7 @@ const Navbar = ({ onMenuClick }) => {
               color="inherit"
               edge="start"
               onClick={onMenuClick}
-              sx={{ 
-                mr: 2,
-                cursor: 'pointer'
-              }}
+              sx={{ mr: 2 }}
             >
               <MenuIcon />
             </IconButton>
@@ -129,7 +125,7 @@ const Navbar = ({ onMenuClick }) => {
         <Box sx={{ 
           flex: 1, 
           maxWidth: '600px', 
-          mx: 2,
+          mr: 2,
           display: 'flex',
           justifyContent: 'center'
         }}>
@@ -177,8 +173,7 @@ const Navbar = ({ onMenuClick }) => {
               '&:hover': {
                 backgroundColor: alpha(theme.palette.common.white, 0.1),
               },
-              p: { xs: 0.5, sm: 1 },
-              cursor: 'pointer'
+              p: { xs: 0.5, sm: 1 }
             }}
           >
             <Badge badgeContent={4} color="error">
@@ -194,8 +189,7 @@ const Navbar = ({ onMenuClick }) => {
               '&:hover': {
                 backgroundColor: alpha(theme.palette.common.white, 0.1),
               },
-              p: { xs: 0.5, sm: 1 },
-              cursor: 'pointer'
+              p: { xs: 0.5, sm: 1 }
             }}
           >
             <PersonIcon />
@@ -216,24 +210,8 @@ const Navbar = ({ onMenuClick }) => {
               }}
               onClick={handleMenu}
             >
-              <Typography 
-                variant="body1" 
-                sx={{ 
-                  fontWeight: 500,
-                  color: '#fff'
-                }}
-              >
-                {user.username}
-              </Typography>
-              <Avatar
-                alt={user.username}
-                src={user.avatar}
-                sx={{ 
-                  width: 32, 
-                  height: 32,
-                  border: '2px solid #fff'
-                }}
-              />
+             
+             
             </Box>
           )}
           <Menu
