@@ -12,6 +12,8 @@ import {
   styled,
 } from '@mui/material';
 import {
+  Home as HomeIcon,
+  Feed as FeedIcon,
   Create as CreateIcon,
   People as PeopleIcon,
   Bookmark as BookmarkIcon,
@@ -22,9 +24,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/slices/authSlice';
 import { grey } from '@mui/material/colors';
 
-const drawerWidth = 240;
-
 const menuItems = [
+  { text: 'Home', icon: <HomeIcon />, path: '/' },
+  { text: 'Feed', icon: <FeedIcon />, path: '/feed' },
   { text: 'Create Post', icon: <CreateIcon />, path: '/create-post' },
   { text: 'Friends', icon: <PeopleIcon />, path: '/friends' },
   { text: 'Saved Posts', icon: <BookmarkIcon />, path: '/saved' },
@@ -32,10 +34,9 @@ const menuItems = [
 ];
 
 const StyledDrawer = styled(Drawer)(({ theme }) => ({
-  width: drawerWidth,
   flexShrink: 0,
   '& .MuiDrawer-paper': {
-    width: drawerWidth,
+    width: 270,
     boxSizing: 'border-box',
     marginTop: '66px',
     background: '#fff',
@@ -45,7 +46,8 @@ const StyledDrawer = styled(Drawer)(({ theme }) => ({
 }));
 
 const StyledListItem = styled(ListItem)(({ theme }) => ({
-  margin: '8px 16px',
+  margin: '8px 0',
+  backgroundColor: grey[100],
   borderRadius: '12px',
   transition: 'all 0.3s ease',
   '&:hover': {
@@ -66,6 +68,8 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
 
 const ProfileSection = styled(Box)(({ theme }) => ({
   padding: '20px 16px',
+  border: '1px solid rgba(124, 58, 237, 0.1)',
+  borderRadius: '12px',
   display: 'flex',
   alignItems: 'center',
   gap: '12px',
@@ -100,7 +104,7 @@ const Sidebar = () => {
 
   return (
     <StyledDrawer variant="permanent">
-      <Box sx={{ overflow: 'none',bgcolor:grey[100] ,}}>
+      <Box sx={{ p:1,bgcolor:'white' ,}}>
         <ProfileSection onClick={() => navigate('/profile')}>
           <Avatar
             src={user?.profilePicture}
@@ -117,7 +121,6 @@ const Sidebar = () => {
         <List>
           {menuItems.map((item) => (
             <StyledListItem
-              button
               key={item.text}
               onClick={() => handleItemClick(item.path)}
             >

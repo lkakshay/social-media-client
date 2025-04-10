@@ -57,30 +57,13 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const Navbar = ({ onMenuClick }) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [anchorEl, setAnchorEl] = React.useState(null);
 
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
-  const handleLogout = async () => {
-    try {
-      await dispatch(logout()).unwrap();
-      handleClose();
-      navigate('/login');
-    } catch (error) {
-      // Error is handled by the auth slice
-    }
-  };
 
   return (
     <AppBar 
@@ -194,54 +177,7 @@ const Navbar = ({ onMenuClick }) => {
           >
             <PersonIcon />
           </IconButton>
-
-          {user && !isMobile && (
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1,
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.common.white, 0.1),
-                  borderRadius: theme.shape.borderRadius,
-                },
-                p: 1
-              }}
-              onClick={handleMenu}
-            >
-             
-             
-            </Box>
-          )}
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-
-          >
-            <MenuItem onClick={() => {
-              handleClose();
-              navigate('/profile');
-            }}>
-              Profile
-            </MenuItem>
-            <MenuItem onClick={() => {
-              handleClose();
-              navigate('/settings');
-            }}>
-              Settings
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
-          </Menu>
+ 
         </Box>
       </Toolbar>
     </AppBar>

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Box, Paper, useTheme, useMediaQuery, Drawer } from '@mui/material';
+import { Box, useTheme, useMediaQuery, Drawer } from '@mui/material';
+import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
-const MainLayout = ({ children }) => {
+const MainLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md')); // 900px and up
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Below 600px
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -24,12 +25,12 @@ const MainLayout = ({ children }) => {
       <Box 
         sx={{ 
           display: 'flex', 
-          mt: '64px', // height of AppBar
+          mt: '64px',
           height: 'calc(100vh - 64px)',
           overflow: 'hidden'
         }}
       >
-        {/* Left Sidebar - Permanent on desktop, Drawer on tablet and mobile */}
+        {/* Left Sidebar */}
         {isDesktop ? (
           <Box sx={{ width: 240, flexShrink: 0 }}>
             <Sidebar />
@@ -40,12 +41,12 @@ const MainLayout = ({ children }) => {
             open={mobileOpen}
             onClose={handleDrawerToggle}
             ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
+              keepMounted: true,
             }}
             sx={{
               '& .MuiDrawer-paper': { 
                 width: 240,
-                mt: '64px', // Start below AppBar
+                mt: '64px',
                 height: 'calc(100% - 64px)'
               },
             }}
@@ -54,25 +55,25 @@ const MainLayout = ({ children }) => {
           </Drawer>
         )}
 
-        {/* Center Content Area - Flexible width */}
+        {/* Main Content Area */}
         <Box 
           sx={{ 
             flexGrow: 1,
             overflow: 'auto',
-            ml: { md: '240px' }, // margin only on desktop
-            mr: { sm: '320px', xs: 0 }, // margin on tablet and up
+            ml: { md: '240px' },
+            mr: { sm: '33.33%', xs: 0 },
             height: '100%',
             p: 2
           }}
         >
-          {children}
+          <Outlet /> {/* This will render the matched route component */}
         </Box>
 
-        {/* Right Sidebar - Hidden on mobile, visible on tablet and desktop */}
+        {/* Right Sidebar */}
         {!isMobile && (
           <Box 
             sx={{ 
-              width: 320,
+              width: { sm: '33.33%', md: 320 },
               borderLeft: '1px solid',
               borderColor: 'divider',
               overflow: 'auto',
@@ -82,20 +83,10 @@ const MainLayout = ({ children }) => {
               bottom: 0,
               bgcolor: 'background.paper',
               p: 2,
-              display: { xs: 'none', sm: 'block' } // Show on tablet and up
+              display: { xs: 'none', sm: 'block' }
             }}
           >
-            <Box sx={{ mb: 4 }}>
-              <Paper elevation={0} sx={{ p: 2, bgcolor: 'grey.100' }}>
-                <Box sx={{ mb: 2, fontWeight: 'bold' }}>Trending</Box>
-                {/* Add your trending content here */}
-              </Paper>
-            </Box>
-
-            <Paper elevation={0} sx={{ p: 2, bgcolor: 'grey.100' }}>
-              <Box sx={{ mb: 2, fontWeight: 'bold' }}>Suggested Users</Box>
-              {/* Add your suggested users content here */}
-            </Paper>
+            <Outlet /> {/* This will render the right sidebar component */}
           </Box>
         )}
       </Box>

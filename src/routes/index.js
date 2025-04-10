@@ -12,6 +12,16 @@ import ExplorePage from '../pages/ExplorePage';
 import Messages from '../pages/Messages';
 import Settings from '../pages/Settings';
 import CreatePost from '../pages/CreatePost';
+import LoginPage from '../pages/auth/Login';
+import RegisterPage from '../pages/auth/Signup';
+import HomePage from '../pages/Home';
+import SavedPosts from '../pages/SavedPosts';
+import Friends from '../pages/Friends';
+import BaseLayout from '../layouts/BaseLayout';
+import HomeLayout from '../layouts/HomeLayout';
+import ProfileLayout from '../layouts/ProfileLayout';
+import MessagesLayout from '../layouts/MessagesLayout';
+import SettingsLayout from '../layouts/SettingsLayout';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -63,5 +73,56 @@ const AppRoutes = () => {
     </Routes>
   );
 };
+
+// Auth Routes
+export const authRoutes = [
+  <Route
+    key="login"
+    path="/login"
+    element={<LoginPage />}
+  />,
+  <Route
+    key="register"
+    path="/register"
+    element={<RegisterPage />}
+  />
+];
+
+// Protected Routes
+export const protectedRoutes = [
+  <Route
+    key="home"
+    element={<HomeLayout />}
+  >
+    <Route path="/" element={<HomePage />} />
+    <Route path="/create-post" element={<CreatePost />} />
+  </Route>,
+  <Route
+    key="profile"
+    element={<ProfileLayout />}
+  >
+    <Route path="/profile" element={<Profile />} />
+  </Route>,
+  <Route
+    key="messages"
+    element={<MessagesLayout />}
+  >
+    <Route path="/messages" element={<Messages />} />
+  </Route>,
+  <Route
+    key="settings"
+    element={<SettingsLayout />}
+  >
+    <Route path="/settings" element={<Settings />} />
+  </Route>,
+  <Route
+    key="other"
+    element={<HomeLayout />}
+  >
+    <Route path="/explore" element={<ExplorePage />} />
+    <Route path="/saved" element={<SavedPosts />} />
+    <Route path="/friends" element={<Friends />} />
+  </Route>
+];
 
 export default AppRoutes; 
