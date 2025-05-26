@@ -1,22 +1,90 @@
-import React from 'react';
-import { Box, Container, Typography, Avatar, Paper, Button, Divider } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { 
+  Box, 
+  Container, 
+  Typography, 
+  Avatar, 
+  Paper, 
+  Button, 
+  Divider,
+  CircularProgress,
+} from '@mui/material';
 import { useSelector } from 'react-redux';
-import { RootState } from '../store';
+import { useParams } from 'react-router-dom';
+import { postsAPI } from '../services/api';
 import PostList from '../components/post/PostList';
 
-const Profile: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
-  const { posts } = useSelector((state: RootState) => state.posts);
+const Profile = () => {
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const [profileUser, setProfileUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    totalPosts: 0
+  });
+  const { userId } = useParams();
 
-  if (!user) {
+  const targetUserId = userId || currentUser?._id;
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        setLoading(true);
+        const response = await postsAPI.getUserPosts(targetUserId);
+        
+        if (response.success && response.data) {
+          setProfileUser(response.data.user);
+          setPagination(response.data.pagination || { totalPosts: 0 });
+          setError(null);
+        } else {
+          setError('Failed to load profile data');
+        }
+      } catch (err) {
+        setError('Failed to load profile data');
+        console.error('Error fetching profile data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (targetUserId) {
+      fetchProfileData();
+    }
+  }, [targetUserId]);
+
+  if (loading && !profileUser) { 
     return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Typography variant="h5">Please log in to view your profile</Typography>
+      <Container maxWidth="lg" sx={{ mt: 4, textAlign: 'center' }}>
+        <CircularProgress sx={{ color: '#7C3AED' }} />
       </Container>
     );
   }
 
-  const userPosts = posts.filter(post => post.userId === Number(user.id));
+  if (!currentUser && !userId && !profileUser) { 
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Typography variant="h5">Please log in to view profiles</Typography>
+      </Container>
+    );
+  }
+  
+  if (error && !profileUser) { 
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, textAlign: 'center' }}>
+        <Typography color="error">{error}</Typography>
+      </Container>
+    );
+  }
+
+  const displayUser = profileUser || currentUser; 
+
+  if (!displayUser) { 
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, textAlign: 'center' }}>
+        <CircularProgress sx={{ color: '#7C3AED' }} /> 
+      </Container>
+    ); 
+  }
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -27,7 +95,7 @@ const Profile: React.FC = () => {
           p: 3, 
           mb: 3, 
           borderRadius: 2,
-          background: 'linear-gradient(135deg, #0396FF 0%, #ABDCFF 100%)',
+          background: 'linear-gradient(135deg, #7C3AED 0%, #9F67FF 100%)',
           color: 'white'
         }}
       >
@@ -38,7 +106,7 @@ const Profile: React.FC = () => {
             justifyContent: 'center' 
           }}>
             <Avatar
-              src={user.avatar}
+              src={displayUser?.profilePicture}
               sx={{ 
                 width: 150, 
                 height: 150, 
@@ -52,13 +120,10 @@ const Profile: React.FC = () => {
             textAlign: { xs: 'center', sm: 'left' }
           }}>
             <Typography variant="h4" gutterBottom>
-              {user.username}
+              {displayUser?.username}
             </Typography>
-            <Typography variant="subtitle1" gutterBottom>
-              @{user.username}
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              {user.email}
+            <Typography variant="subtitle1" gutterBottom sx={{ opacity: 0.9 }}>
+              {displayUser?.username}
             </Typography>
             <Box sx={{ 
               display: 'flex', 
@@ -67,7 +132,7 @@ const Profile: React.FC = () => {
               justifyContent: { xs: 'center', sm: 'flex-start' }
             }}>
               <Typography variant="body1">
-                <strong>{userPosts.length}</strong> posts
+                <strong>{pagination?.totalPosts ?? '...'}</strong> posts
               </Typography>
               <Typography variant="body1">
                 <strong>0</strong> followers
@@ -76,28 +141,31 @@ const Profile: React.FC = () => {
                 <strong>0</strong> following
               </Typography>
             </Box>
-            <Button 
-              variant="contained" 
-              sx={{ 
-                backgroundColor: 'white',
-                color: '#0396FF',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)'
-                }
-              }}
-            >
-              Edit Profile
-            </Button>
+            {(!userId || userId === currentUser?._id) && (
+              <Button 
+                variant="contained" 
+                sx={{ 
+                  backgroundColor: 'white',
+                  color: '#7C3AED',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)'
+                  }
+                }}
+              >
+                Edit Profile
+              </Button>
+            )}
           </Box>
         </Box>
       </Paper>
 
-      {/* User Posts */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
+      {/* User Posts - Use PostList */}
+      <Box sx={{ mb: 3, maxWidth: 600, mx: 'auto' }}>
+        <Typography variant="h6" gutterBottom sx={{ color: '#7C3AED' }}>
           Posts
         </Typography>
         <Divider sx={{ mb: 2 }} />
+        
         <PostList />
       </Box>
     </Container>

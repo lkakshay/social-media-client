@@ -102,10 +102,20 @@ const Sidebar = () => {
     }
   };
 
+  const handleProfileClick = () => {
+    if (user && user._id) {
+      navigate(`/profile/${user._id}`);
+    } else {
+      // Handle case where user or user ID might not be available yet
+      console.error("User ID not found for profile navigation");
+      // Optionally navigate somewhere else or show an error
+    }
+  };
+
   return (
     <StyledDrawer variant="permanent">
       <Box sx={{ p:1,bgcolor:'white' ,}}>
-        <ProfileSection onClick={() => navigate('/profile')}>
+        <ProfileSection onClick={handleProfileClick}>
           <Avatar
             src={user?.profilePicture}
             alt={user?.username}

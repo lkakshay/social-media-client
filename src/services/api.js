@@ -162,4 +162,25 @@ export const authAPI = {
   refresh: refreshToken 
 };
 
+export const postsAPI = {
+  createPost: async (formData) => {
+    const response = await api.post('/posts/create', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+  
+  getUserPosts: async (userId) => {
+    const response = await api.get(`/posts/user/${userId}`);
+    return response.data;
+  },
+
+  getHomePosts: async () => {
+    const response = await api.get('/posts/home');
+    return response.data;
+  },
+};
+
 export default api; 

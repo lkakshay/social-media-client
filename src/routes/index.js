@@ -101,7 +101,7 @@ export const protectedRoutes = [
     key="profile"
     element={<ProfileLayout />}
   >
-    <Route path="/profile" element={<Profile />} />
+    <Route path="/profile/:userId" element={<Profile />} />
   </Route>,
   <Route
     key="messages"
